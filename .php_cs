@@ -50,7 +50,6 @@ return Symfony\CS\Config\Config::create()
             'spaces_before_semicolon',
             'spaces_cast',
             'standardize_not_equal',
-            'strict',
             'ternary_spaces',
             'trim_array_spaces',
             'unalign_double_arrow',
@@ -60,4 +59,3 @@ return Symfony\CS\Config\Config::create()
         ]
     )
 ;
-
