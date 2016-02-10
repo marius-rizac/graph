@@ -6,12 +6,10 @@ use Fhaculty\Graph\Edge\Base as Edge;
 use Fhaculty\Graph\Exception\UnderflowException;
 use Fhaculty\Graph\Exception\InvalidArgumentException;
 use Fhaculty\Graph\Exception\OutOfBoundsException;
-use Fhaculty\Graph\Exception\UnexpectedValueException;
 use Countable;
 use IteratorAggregate;
 use IteratorIterator;
 use ArrayIterator;
-use Fhaculty\Graph\Set\EdgesAggregate;
 
 /**
  * A Set of Edges
@@ -28,6 +26,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * order by edge weight
      *
      * @var int
+     *
      * @see Edge::getWeight()
      */
     const ORDER_WEIGHT = 1;
@@ -36,6 +35,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * order by edge capacity
      *
      * @var int
+     *
      * @see Edge::getCapacity()
      */
     const ORDER_CAPACITY = 2;
@@ -44,6 +44,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * order by remaining capacity on edge (maximum capacity - current flow)
      *
      * @var int
+     *
      * @see Edge::getCapacityRemaining()
      */
     const ORDER_CAPACITY_REMAINING = 3;
@@ -52,6 +53,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * order by edge flow
      *
      * @var int
+     *
      * @see Edge::getFlow()
      */
     const ORDER_FLOW = 4;
@@ -63,7 +65,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      */
     const ORDER_RANDOM = 5;
 
-    protected $edges = array();
+    protected $edges = [];
 
     /**
      * create new Edges instance
@@ -76,6 +78,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * - an existing Set of Edges which will be returned as-is
      *
      * @param array|Edges|EdgesAggregate $edges
+     *
      * @return Edges
      */
     public static function factory($edges)
@@ -83,6 +86,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
         if ($edges instanceof EdgesAggregate) {
             return $edges->getEdges();
         }
+
         return new self($edges);
     }
 
@@ -94,12 +98,14 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * array, it will automatically be included in this Set.
      *
      * @param array $edgesArray
+     *
      * @return Edges
      */
     public static function factoryArrayReference(array &$edgesArray)
     {
         $edges = new static();
         $edges->edges =& $edgesArray;
+
         return $edges;
     }
 
@@ -108,7 +114,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      *
      * @param array $edges
      */
-    public function __construct(array $edges = array())
+    public function __construct(array $edges = [])
     {
         $this->edges = $edges;
     }
@@ -117,7 +123,9 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * get array index for given Edge
      *
      * @param Edge $edge
+     *
      * @throws OutOfBoundsException
+     *
      * @return mixed
      */
     public function getIndexEdge(Edge $edge)
@@ -126,6 +134,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
         if ($id === false) {
             throw new OutOfBoundsException('Given edge does NOT exist');
         }
+
         return $id;
     }
 
@@ -136,8 +145,10 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * starting point. this is a convenience function to just pick the first
      * edge from the list of known edges.
      *
-     * @return Edge               first Edge in this set of Edges
      * @throws UnderflowException if set is empty
+     *
+     * @return Edge               first Edge in this set of Edges
+     *
      * @see self::getEdgeOrder()  if you need to apply ordering first
      */
     public function getEdgeFirst()
@@ -153,8 +164,9 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
     /**
      * return last Edge in this set of Edges
      *
-     * @return Edge               last Edge in this set of Edges
      * @throws UnderflowException if set is empty
+     *
+     * @return Edge               last Edge in this set of Edges
      */
     public function getEdgeLast()
     {
@@ -170,7 +182,9 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * return Edge at given array index
      *
      * @param mixed $index
+     *
      * @throws OutOfBoundsException if the given index does not exist
+     *
      * @return Edge
      */
     public function getEdgeIndex($index)
@@ -178,6 +192,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
         if (!isset($this->edges[$index])) {
             throw new OutOfBoundsException('Invalid edge index');
         }
+
         return $this->edges[$index];
     }
 
@@ -185,9 +200,13 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * return first Edge that matches the given callback filter function
      *
      * @param callback $callbackCheck
-     * @return Edge
+     *
      * @throws UnderflowException if no Edge matches the given callback filter function
+     *
+     * @return Edge
+     *
      * @uses self::getEdgeMatchOrNull()
+     *
      * @see self::getEdgesMatch() if you want to return *all* Edges that match
      */
     public function getEdgeMatch($callbackCheck)
@@ -196,6 +215,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
         if ($ret === null) {
             throw new UnderflowException('No edge found');
         }
+
         return $ret;
     }
 
@@ -203,8 +223,11 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * checks whethere there's an Edge that matches the given callback filter function
      *
      * @param callback $callbackCheck
-     * @return boolean
+     *
+     * @return bool
+     *
      * @see self::getEdgeMatch() to return the Edge instance that matches the given callback filter function
+     *
      * @uses self::getEdgeMatchOrNull()
      */
     public function hasEdgeMatch($callbackCheck)
@@ -221,7 +244,9 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * Edge index positions will be left unchanged.
      *
      * @param callable $callbackCheck
+     *
      * @return Edges a new Edges instance
+     *
      * @see self::getEdgeMatch()
      */
     public function getEdgesMatch($callbackCheck)
@@ -235,9 +260,11 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * Edge index positions will be left unchanged.
      *
      * @param  int                      $orderBy  criterium to sort by. see self::ORDER_WEIGHT, etc.
-     * @param  boolean                  $desc     whether to return biggest first (true) instead of smallest first (default:false)
-     * @return Edges                    a new Edges set ordered by the given $orderBy criterium
+     * @param  bool                  $desc     whether to return biggest first (true) instead of smallest first (default:false)
+     *
      * @throws InvalidArgumentException if criterium is unknown
+     *
+     * @return Edges                    a new Edges set ordered by the given $orderBy criterium
      */
     public function getEdgesOrder($orderBy, $desc = false)
     {
@@ -247,7 +274,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
             shuffle($keys);
 
             // re-order according to shuffled edge positions
-            $edges = array();
+            $edges = [];
             foreach ($keys as $key) {
                 $edges[$key] = $this->edges[$key];
             }
@@ -257,7 +284,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
         }
 
         $callback = $this->getCallback($orderBy);
-        $array    = $this->edges;
+        $array = $this->edges;
 
         uasort($array, function (Edge $va, Edge $vb) use ($callback, $desc) {
             $ra = $callback($desc ? $vb : $va);
@@ -279,10 +306,12 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * get first edge ordered by given criterium $orderBy
      *
      * @param  int                      $orderBy  criterium to sort by. see self::ORDER_WEIGHT, etc.
-     * @param  boolean                  $desc     whether to return biggest (true) instead of smallest (default:false)
-     * @return Edge
+     * @param  bool                  $desc     whether to return biggest (true) instead of smallest (default:false)
+     *
      * @throws InvalidArgumentException if criterium is unknown
      * @throws UnderflowException       if no edges exist
+     *
+     * @return Edge
      */
     public function getEdgeOrder($orderBy, $desc=false)
     {
@@ -297,12 +326,12 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
 
         $callback = $this->getCallback($orderBy);
 
-        $ret = NULL;
-        $best = NULL;
+        $ret = null;
+        $best = null;
         foreach ($this->edges as $edge) {
             $now = $callback($edge);
 
-            if ($ret === NULL || ($desc && $now > $best) || (!$desc && $now < $best)) {
+            if ($ret === null || ($desc && $now > $best) || (!$desc && $now < $best)) {
                 $ret = $edge;
                 $best = $now;
             }
@@ -315,6 +344,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * return self reference to Set of Edges
      *
      * @return Edges
+     *
      * @see self::factory()
      */
     public function getEdges()
@@ -329,7 +359,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      */
     public function getEdgesDistinct()
     {
-        $edges = array();
+        $edges = [];
         foreach ($this->edges as $edge) {
             // filter duplicate edges
             if (!in_array($edge, $edges, true)) {
@@ -337,7 +367,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
             }
         }
 
-        return new Edges($edges);
+        return new self($edges);
     }
 
     /**
@@ -352,13 +382,14 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * Edge instances is also found in $otherEdges.
      *
      * @param Edges|Edge[] $otherEdges
+     *
      * @return Edges a new Edges set
      */
     public function getEdgesIntersection($otherEdges)
     {
         $otherArray = self::factory($otherEdges)->getVector();
 
-        $edges = array();
+        $edges = [];
         foreach ($this->edges as $eid => $edge) {
             $i = array_search($edge, $otherArray, true);
 
@@ -387,6 +418,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * count number of Edges
      *
      * @return int
+     *
      * @see self::isEmpty()
      */
     public function count()
@@ -400,7 +432,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * A Set if empty if no single Edge instance is added. This is faster
      * than calling `count() === 0`.
      *
-     * @return boolean
+     * @return bool
      */
     public function isEmpty()
     {
@@ -424,8 +456,11 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * call given $callback on each Edge and sum their results
      *
      * @param callable $callback
-     * @return number
+     *
      * @throws InvalidArgumentException for invalid callbacks
+     *
+     * @return number
+     *
      * @uses self::getCallback()
      */
     public function getSumCallback($callback)
@@ -438,6 +473,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
         foreach ($this->edges as $edge) {
             $sum += $callback($edge);
         }
+
         return $sum;
     }
 
@@ -450,6 +486,7 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
                 return $edge;
             }
         }
+
         return null;
     }
 
@@ -457,7 +494,9 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
      * get callback/Closure to be called on Edge instances for given callback identifier
      *
      * @param callable|int $callback
+     *
      * @throws InvalidArgumentException
+     *
      * @return Closure
      */
     private function getCallback($callback)
@@ -468,15 +507,16 @@ class Edges implements Countable, IteratorAggregate, EdgesAggregate
                     return call_user_func($callback, $edge);
                 };
             }
+
             return $callback;
         }
 
-        static $methods = array(
+        static $methods = [
             self::ORDER_WEIGHT => 'getWeight',
             self::ORDER_CAPACITY => 'getCapacity',
             self::ORDER_CAPACITY_REMAINING => 'getCapacityRemaining',
-            self::ORDER_FLOW => 'getFlow'
-        );
+            self::ORDER_FLOW => 'getFlow',
+        ];
 
         if (!is_int($callback) || !isset($methods[$callback])) {
             throw new InvalidArgumentException('Invalid callback given');

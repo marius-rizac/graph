@@ -26,11 +26,12 @@ class Walk implements DualAggregate
      *
      * @param  Edges|Edge[]         $edges
      * @param  Vertex               $startVertex
+     *
      * @return Walk
      */
     public static function factoryFromEdges($edges, Vertex $startVertex)
     {
-        $vertices = array($startVertex);
+        $vertices = [$startVertex];
         $vertexCurrent = $startVertex;
         foreach ($edges as $edge) {
             $vertexCurrent = $edge->getVertexToFrom($vertexCurrent);
@@ -45,19 +46,22 @@ class Walk implements DualAggregate
      *
      * @param  Vertices|Vertex[]  $vertices
      * @param  int|null           $by
-     * @param  boolean            $desc
-     * @return Walk
+     * @param  bool            $desc
+     *
      * @throws UnderflowException if no vertices were given
+     *
+     * @return Walk
+     *
      * @see Edges::getEdgeOrder() for parameters $by and $desc
      */
     public static function factoryFromVertices($vertices, $by = null, $desc = false)
     {
-        $edges = array();
-        $first = NULL;
-        $last = NULL;
+        $edges = [];
+        $first = null;
+        $last = null;
         foreach ($vertices as $vertex) {
             // skip first vertex as last is unknown
-            if ($first === NULL) {
+            if ($first === null) {
                 $first = $vertex;
             } else {
                 // pick edge between last vertex and this vertex
@@ -69,7 +73,7 @@ class Walk implements DualAggregate
             }
             $last = $vertex;
         }
-        if ($last === NULL) {
+        if ($last === null) {
             throw new UnderflowException('No vertices given');
         }
 
@@ -82,17 +86,21 @@ class Walk implements DualAggregate
      * @param  Vertex[]           $predecessors map of vid => predecessor vertex instance
      * @param  Vertex             $vertex       start vertex to search predecessors from
      * @param  int|null           $by
-     * @param  boolean            $desc
-     * @return Walk
+     * @param  bool            $desc
+     *
      * @throws UnderflowException
+     *
+     * @return Walk
+     *
      * @see Edges::getEdgeOrder() for parameters $by and $desc
+     *
      * @uses self::factoryFromVertices()
      */
     public static function factoryCycleFromPredecessorMap(array $predecessors, Vertex $vertex, $by = null, $desc = false)
     {
         // find a vertex in the cycle
         $vid = $vertex->getId();
-        $startVertices = array();
+        $startVertices = [];
         do {
             if (!isset($predecessors[$vid])) {
                 throw new InvalidArgumentException('Predecessor map is incomplete and does not form a cycle');
@@ -107,7 +115,7 @@ class Walk implements DualAggregate
         // find negative cycle
         $vid = $vertex->getId();
         // build array of vertices in cycle
-        $vertices = array();
+        $vertices = [];
         do {
             // add new vertex to cycle
             $vertices[$vid] = $vertex;
@@ -132,10 +140,14 @@ class Walk implements DualAggregate
      *
      * @param  Vertex[]|Vertices  $vertices
      * @param  int|null           $by
-     * @param  boolean            $desc
-     * @return Walk
+     * @param  bool            $desc
+     *
      * @throws UnderflowException if no vertices were given
+     *
+     * @return Walk
+     *
      * @see Edges::getEdgeOrder() for parameters $by and $desc
+     *
      * @uses self::factoryFromVertices()
      */
     public static function factoryCycleFromVertices($vertices, $by = null, $desc = false)
@@ -158,8 +170,11 @@ class Walk implements DualAggregate
      *
      * @param  Edges|Edge[] $edges
      * @param  Vertex       $startVertex
-     * @return Walk
+     *
      * @throws InvalidArgumentException if the given array of edges does not represent a valid cycle
+     *
+     * @return Walk
+     *
      * @uses self::factoryFromEdges()
      */
     public static function factoryCycleFromEdges($edges, Vertex $startVertex)
@@ -175,13 +190,11 @@ class Walk implements DualAggregate
     }
 
     /**
-     *
      * @var Vertices
      */
     protected $vertices;
 
     /**
-     *
      * @var Edges
      */
     protected $edges;
@@ -189,13 +202,14 @@ class Walk implements DualAggregate
     protected function __construct($vertices, $edges)
     {
         $this->vertices = Vertices::factory($vertices);
-        $this->edges    = Edges::factory($edges);
+        $this->edges = Edges::factory($edges);
     }
 
     /**
      * return original graph
      *
      * @return Graph
+     *
      * @uses self::getVertices()
      * @uses Vertices::getVertexFirst()
      * @uses Vertex::getGraph()
@@ -211,6 +225,7 @@ class Walk implements DualAggregate
      * do not add duplicate vertices and edges for loops and intersections, etc.
      *
      * @return Graph
+     *
      * @uses Walk::getEdges()
      * @uses Graph::createGraphCloneEdges()
      */
@@ -269,10 +284,10 @@ class Walk implements DualAggregate
      */
     public function getAlternatingSequence()
     {
-        $edges    = $this->edges->getVector();
+        $edges = $this->edges->getVector();
         $vertices = $this->vertices->getVector();
 
-        $ret = array();
+        $ret = [];
         for ($i = 0, $l = count($this->edges); $i < $l; ++$i) {
             $ret []= $vertices[$i];
             $ret []= $edges[$i];
@@ -285,7 +300,8 @@ class Walk implements DualAggregate
     /**
      * check to make sure this walk is still valid (i.e. source graph still contains all vertices and edges)
      *
-     * @return boolean
+     * @return bool
+     *
      * @uses Walk::getGraph()
      * @uses Graph::getVertices()
      * @uses Graph::getEdges()

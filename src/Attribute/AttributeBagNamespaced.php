@@ -47,6 +47,7 @@ class AttributeBagNamespaced implements AttributeBag
      *
      * @param string $name
      * @param mixed  $default to return if attribute was not found
+     *
      * @return mixed
      */
     public function getAttribute($name, $default = null)
@@ -61,6 +62,7 @@ class AttributeBagNamespaced implements AttributeBag
      *
      * @param  string $name
      * @param  mixed  $value
+     *
      * @return void
      */
     public function setAttribute($name, $value)
@@ -77,7 +79,7 @@ class AttributeBagNamespaced implements AttributeBag
      */
     public function getAttributes()
     {
-        $attributes = array();
+        $attributes = [];
         $len = strlen($this->prefix);
 
         foreach ($this->bag->getAttributes() as $name => $value) {
@@ -95,6 +97,7 @@ class AttributeBagNamespaced implements AttributeBag
      * Each attribute is prefixed before setting in the base bag.
      *
      * @param  array $attributes
+     *
      * @return void
      */
     public function setAttributes(array $attributes)

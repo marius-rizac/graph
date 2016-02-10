@@ -14,6 +14,7 @@ interface AttributeAware
      *
      * @param string $name
      * @param mixed  $default to return if attribute was not found
+     *
      * @return mixed
      */
     public function getAttribute($name, $default = null);

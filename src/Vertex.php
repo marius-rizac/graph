@@ -9,7 +9,6 @@ use Fhaculty\Graph\Set\Edges;
 use Fhaculty\Graph\Set\EdgesAggregate;
 use Fhaculty\Graph\Set\Vertices;
 use Fhaculty\Graph\Exception\BadMethodCallException;
-use Fhaculty\Graph\Exception\UnexpectedValueException;
 use Fhaculty\Graph\Exception\InvalidArgumentException;
 use Fhaculty\Graph\Attribute\AttributeAware;
 use Fhaculty\Graph\Attribute\AttributeBagReference;
@@ -21,7 +20,7 @@ class Vertex implements EdgesAggregate, AttributeAware
     /**
      * @var Edge[]
      */
-    private $edges = array();
+    private $edges = [];
 
     /**
      * @var Graph
@@ -32,6 +31,7 @@ class Vertex implements EdgesAggregate, AttributeAware
      * vertex balance
      *
      * @var float|NULL
+     *
      * @see Vertex::setBalance()
      */
     private $balance;
@@ -40,17 +40,19 @@ class Vertex implements EdgesAggregate, AttributeAware
      * group number
      *
      * @var int
+     *
      * @see Vertex::setGroup()
      */
     private $group = 0;
 
-    private $attributes = array();
+    private $attributes = [];
 
     /**
      * Create a new Vertex
      *
      * @param Graph      $graph graph to be added to
      * @param string|int $id    identifier used to uniquely identify this vertex in the graph
+     *
      * @see Graph::createVertex() to create new vertices
      */
     public function __construct(Graph $graph, $id)
@@ -82,7 +84,7 @@ class Vertex implements EdgesAggregate, AttributeAware
 
     public function setBalance($balance)
     {
-        if ($balance !== NULL && !is_float($balance) && !is_int($balance)) {
+        if ($balance !== null && !is_float($balance) && !is_int($balance)) {
             throw new InvalidArgumentException('Invalid balance given - must be numeric');
         }
         $this->balance = $balance;
@@ -94,8 +96,10 @@ class Vertex implements EdgesAggregate, AttributeAware
      * set group number of this vertex
      *
      * @param  int                      $group
-     * @return Vertex                   $this (chainable)
+     *
      * @throws InvalidArgumentException if group is not numeric
+     *
+     * @return Vertex                   $this (chainable)
      */
     public function setGroup($group)
     {
@@ -131,8 +135,11 @@ class Vertex implements EdgesAggregate, AttributeAware
      * create new directed edge from this start vertex to given target vertex
      *
      * @param  Vertex                   $vertex target vertex
-     * @return EdgeDirected
+     *
      * @throws InvalidArgumentException
+     *
+     * @return EdgeDirected
+     *
      * @uses Graph::addEdge()
      */
     public function createEdgeTo(Vertex $vertex)
@@ -144,8 +151,11 @@ class Vertex implements EdgesAggregate, AttributeAware
      * add new undirected (bidirectional) edge between this vertex and given vertex
      *
      * @param  Vertex                   $vertex
-     * @return EdgeUndirected
+     *
      * @throws InvalidArgumentException
+     *
+     * @return EdgeUndirected
+     *
      * @uses Graph::addEdge()
      */
     public function createEdge(Vertex $vertex)
@@ -157,8 +167,10 @@ class Vertex implements EdgesAggregate, AttributeAware
      * add the given edge to list of connected edges (MUST NOT be called manually)
      *
      * @param  Edge                     $edge
+     *
      * @return void
      * @private
+     *
      * @see self::createEdge() instead!
      */
     public function addEdge(Edge $edge)
@@ -170,9 +182,12 @@ class Vertex implements EdgesAggregate, AttributeAware
      * remove the given edge from list of connected edges (MUST NOT be called manually)
      *
      * @param  Edge                     $edge
-     * @return void
+     *
      * @throws InvalidArgumentException if given edge does not exist
+     *
+     * @return void
      * @private
+     *
      * @see Edge::destroy() instead!
      */
     public function removeEdge(Edge $edge)
@@ -188,7 +203,9 @@ class Vertex implements EdgesAggregate, AttributeAware
      * check whether this vertex has a direct edge to given $vertex
      *
      * @param  Vertex  $vertex
-     * @return boolean
+     *
+     * @return bool
+     *
      * @uses Edge::hasVertexTarget()
      */
     public function hasEdgeTo(Vertex $vertex)
@@ -204,7 +221,9 @@ class Vertex implements EdgesAggregate, AttributeAware
      * check whether the given vertex has a direct edge to THIS vertex
      *
      * @param  Vertex  $vertex
-     * @return boolean
+     *
+     * @return bool
+     *
      * @uses Vertex::hasEdgeTo()
      */
     public function hasEdgeFrom(Vertex $vertex)
@@ -254,7 +273,9 @@ class Vertex implements EdgesAggregate, AttributeAware
      * get set of Edges FROM this vertex TO the given vertex
      *
      * @param  Vertex $vertex
+     *
      * @return Edges
+     *
      * @uses Edge::hasVertexTarget()
      */
     public function getEdgesTo(Vertex $vertex)
@@ -270,7 +291,9 @@ class Vertex implements EdgesAggregate, AttributeAware
      * get set of Edges FROM the given vertex TO this vertex
      *
      * @param  Vertex $vertex
+     *
      * @return Edges
+     *
      * @uses Vertex::getEdgesTo()
      */
     public function getEdgesFrom(Vertex $vertex)
@@ -286,13 +309,14 @@ class Vertex implements EdgesAggregate, AttributeAware
      * want unique Vertex instances, use `getVerticesDistinct()`.
      *
      * @return Vertices
+     *
      * @uses Edge::hasVertexStart()
      * @uses Edge::getVerticesToFrom()
      * @uses Edge::getVerticesFromTo()
      */
     public function getVerticesEdge()
     {
-        $ret = array();
+        $ret = [];
         foreach ($this->edges as $edge) {
             if ($edge->hasVertexStart($this)) {
                 $ret []= $edge->getVertexToFrom($this);
@@ -312,12 +336,13 @@ class Vertex implements EdgesAggregate, AttributeAware
      * want unique Vertex instances, use `getVerticesDistinct()`.
      *
      * @return Vertices
+     *
      * @uses Vertex::getEdgesOut()
      * @uses Edge::getVerticesToFrom()
      */
     public function getVerticesEdgeTo()
     {
-        $ret = array();
+        $ret = [];
         foreach ($this->getEdgesOut() as $edge) {
             $ret []= $edge->getVertexToFrom($this);
         }
@@ -333,12 +358,13 @@ class Vertex implements EdgesAggregate, AttributeAware
      * want unique Vertex instances, use `getVerticesDistinct()`.
      *
      * @return Vertices
+     *
      * @uses Vertex::getEdgesIn()
      * @uses Edge::getVerticesFromTo()
      */
     public function getVerticesEdgeFrom()
     {
-        $ret = array();
+        $ret = [];
         foreach ($this->getEdgesIn() as $edge) {
             $ret []= $edge->getVertexFromTo($this);
         }

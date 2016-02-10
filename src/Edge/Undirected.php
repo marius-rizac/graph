@@ -27,6 +27,7 @@ class Undirected extends Base
      *
      * @param Vertex $a
      * @param Vertex $b
+     *
      * @see Vertex::createEdge() instead
      */
     public function __construct(Vertex $a, Vertex $b)
@@ -45,17 +46,17 @@ class Undirected extends Base
 
     public function getVerticesTarget()
     {
-        return new Vertices(array($this->b, $this->a));
+        return new Vertices([$this->b, $this->a]);
     }
 
     public function getVerticesStart()
     {
-        return new Vertices(array($this->a, $this->b));
+        return new Vertices([$this->a, $this->b]);
     }
 
     public function getVertices()
     {
-        return new Vertices(array($this->a, $this->b));
+        return new Vertices([$this->a, $this->b]);
     }
 
     public function isConnection(Vertex $from, Vertex $to)

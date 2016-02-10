@@ -3,7 +3,6 @@
 namespace Fhaculty\Graph\Edge;
 
 use Fhaculty\Graph\Exception\InvalidArgumentException;
-use Fhaculty\Graph\Exception\LogicException;
 use Fhaculty\Graph\Vertex;
 use Fhaculty\Graph\Set\Vertices;
 use Fhaculty\Graph\Set\Edges;
@@ -29,6 +28,7 @@ class Directed extends Base
      *
      * @param Vertex $from start/source Vertex
      * @param Vertex $to   end/target Vertex
+     *
      * @see Vertex::createEdgeTo() to create directed edges
      * @see Vertex::createEdge() to create undirected edges
      */
@@ -48,17 +48,17 @@ class Directed extends Base
 
     public function getVerticesTarget()
     {
-        return new Vertices(array($this->to));
+        return new Vertices([$this->to]);
     }
 
     public function getVerticesStart()
     {
-        return new Vertices(array($this->from));
+        return new Vertices([$this->from]);
     }
 
     public function getVertices()
     {
-        return new Vertices(array($this->from, $this->to));
+        return new Vertices([$this->from, $this->to]);
     }
 
     /**

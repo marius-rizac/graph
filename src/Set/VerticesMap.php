@@ -4,8 +4,6 @@ namespace Fhaculty\Graph\Set;
 
 use Fhaculty\Graph\Vertex;
 use Fhaculty\Graph\Exception\OutOfBoundsException;
-use Fhaculty\Graph\Exception\InvalidArgumentException;
-use Fhaculty\Graph\Set\Vertices;
 
 /**
  * A set of Vertices that are already stored in a vertex ID => Vertex instance mapping array
@@ -26,6 +24,7 @@ class VerticesMap extends Vertices
         if (!isset($this->vertices[$id])) {
             throw new OutOfBoundsException('Invalid vertex ID');
         }
+
         return $this->vertices[$id];
     }
 
@@ -50,11 +49,11 @@ class VerticesMap extends Vertices
         if (!isset($this->vertices[$id]) || $this->vertices[$id] !== $vertex) {
             throw new OutOfBoundsException();
         }
+
         return $id;
     }
 
     /**
-     *
      * @return VerticesMap
      */
     public function getVertices()

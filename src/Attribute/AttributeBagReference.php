@@ -34,6 +34,7 @@ class AttributeBagReference implements AttributeBag
      *
      * @param  string $name
      * @param  mixed  $default to return if attribute was not found
+     *
      * @return mixed
      */
     public function getAttribute($name, $default = null)
@@ -46,6 +47,7 @@ class AttributeBagReference implements AttributeBag
      *
      * @param  string $name
      * @param  mixed  $value
+     *
      * @return self   For a fluid interface.
      */
     public function setAttribute($name, $value)
@@ -69,6 +71,7 @@ class AttributeBagReference implements AttributeBag
      * set an array of additional attributes
      *
      * @param  array $attributes
+     *
      * @return self  For a fluid interface.
      */
     public function setAttributes(array $attributes)

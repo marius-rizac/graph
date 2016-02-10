@@ -2,6 +2,7 @@
 
 namespace Fhaculty\Graph\Edge;
 
+use Fhaculty\Graph\Exception\DomainException;
 use Fhaculty\Graph\Vertex;
 use Fhaculty\Graph\Set\Edges;
 use Fhaculty\Graph\Set\Vertices;
@@ -9,7 +10,6 @@ use Fhaculty\Graph\Set\VerticesAggregate;
 use Fhaculty\Graph\Graph;
 use Fhaculty\Graph\Exception\LogicException;
 use Fhaculty\Graph\Exception\RangeException;
-use Fhaculty\Graph\Exception\UnderflowException;
 use Fhaculty\Graph\Exception\InvalidArgumentException;
 use Fhaculty\Graph\Exception\BadMethodCallException;
 use Fhaculty\Graph\Attribute\AttributeAware;
@@ -21,27 +21,33 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * weight of this edge
      *
      * @var float|int|NULL
+     *
      * @see Edge::getWeight()
      */
-    protected $weight = NULL;
+    protected $weight = null;
 
     /**
      * maximum capacity (maximum flow)
      *
      * @var float|int|NULL
+     *
      * @see Edge::getCapacity()
      */
-    protected $capacity = NULL;
+    protected $capacity = null;
 
     /**
      * flow (capacity currently in use)
      *
      * @var float|int|NULL
+     *
      * @see Edge::getFlow()
      */
-    protected $flow = NULL;
+    protected $flow = null;
 
-    protected $attributes = array();
+    /**
+     * @var array
+     */
+    protected $attributes = [];
 
     /**
      * get Vertices that are a target of this edge
@@ -61,7 +67,9 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * return true if this edge is an outgoing edge of the given vertex (i.e. the given vertex is a valid start vertex of this edge)
      *
      * @param  Vertex  $startVertex
-     * @return boolean
+     *
+     * @return bool
+     *
      * @uses Vertex::getVertexToFrom()
      */
     abstract public function hasVertexStart(Vertex $startVertex);
@@ -70,17 +78,25 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * return true if this edge is an ingoing edge of the given vertex (i . e. the given vertex is a valid end vertex of this edge)
      *
      * @param  Vertex  $targetVertex
-     * @return boolean
+     *
+     * @return bool
+     *
      * @uses Vertex::getVertexFromTo()
      */
-    abstract function hasVertexTarget(Vertex $targetVertex);
+    abstract public function hasVertexTarget(Vertex $targetVertex);
 
+    /**
+     * @param Vertex $from
+     * @param Vertex $to
+     *
+     * @return mixed
+     */
     abstract public function isConnection(Vertex $from, Vertex $to);
 
     /**
      * returns whether this edge is actually a loop
      *
-     * @return boolean
+     * @return bool
      */
     abstract public function isLoop();
 
@@ -88,8 +104,11 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * get target vertex we can reach with this edge from the given start vertex
      *
      * @param  Vertex                   $startVertex
-     * @return Vertex
+     *
      * @throws InvalidArgumentException if given $startVertex is not a valid start
+     *
+     * @return Vertex
+     *
      * @see Edge::hasEdgeFrom() to check if given start is valid
      */
     abstract public function getVertexToFrom(Vertex $startVertex);
@@ -98,8 +117,11 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * get start vertex which can reach us(the given end vertex) with this edge
      *
      * @param  Vertex                   $startVertex
-     * @return Vertex
+     *
      * @throws InvalidArgumentException if given $startVertex is not a valid end
+     *
+     * @return Vertex
+     *
      * @see Edge::hasEdgeFrom() to check if given start is valid
      */
     abstract public function getVertexFromTo(Vertex $endVertex);
@@ -118,12 +140,14 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * set new weight for edge
      *
      * @param  float|int|NULL  $weight new numeric weight of edge or NULL=unset weight
-     * @return Edge            $this (chainable)
+     *
      * @throws DomainException if given weight is not numeric
+     *
+     * @return Edges            $this (chainable)
      */
     public function setWeight($weight)
     {
-        if ($weight !== NULL && !is_float($weight) && !is_int($weight)) {
+        if ($weight !== null && !is_float($weight) && !is_int($weight)) {
             throw new InvalidArgumentException('Invalid weight given - must be numeric or NULL');
         }
         $this->weight = $weight;
@@ -148,8 +172,8 @@ abstract class Base implements VerticesAggregate, AttributeAware
      */
     public function getCapacityRemaining()
     {
-        if ($this->capacity === NULL) {
-            return NULL;
+        if ($this->capacity === null) {
+            return null;
         }
 
         return $this->capacity - $this->flow;
@@ -159,20 +183,22 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * set new total capacity of this edge
      *
      * @param  float|int|NULL           $capacity
-     * @return Edge                     $this (chainable)
+     *
      * @throws InvalidArgumentException if $capacity is invalid (not numeric or negative)
      * @throws RangeException           if current flow exceeds new capacity
+     *
+     * @return Edges                    $this (chainable)
      */
     public function setCapacity($capacity)
     {
-        if ($capacity !== NULL) {
+        if ($capacity !== null) {
             if (!is_float($capacity) && !is_int($capacity)) {
                 throw new InvalidArgumentException('Invalid capacity given - must be numeric');
             }
             if ($capacity < 0) {
                 throw new InvalidArgumentException('Capacity must not be negative');
             }
-            if ($this->flow !== NULL && $this->flow > $capacity) {
+            if ($this->flow !== null && $this->flow > $capacity) {
                 throw new RangeException('Current flow of ' . $this->flow . ' exceeds new capacity');
             }
         }
@@ -195,20 +221,22 @@ abstract class Base implements VerticesAggregate, AttributeAware
      * set new total flow (capacity currently in use)
      *
      * @param  float|int|NULL           $flow
-     * @return Edge                     $this (chainable)
+     *
      * @throws InvalidArgumentException if $flow is invalid (not numeric or negative)
      * @throws RangeException           if flow exceeds current maximum capacity
+     *
+     * @return Edges                    $this (chainable)
      */
     public function setFlow($flow)
     {
-        if ($flow !== NULL) {
+        if ($flow !== null) {
             if (!is_float($flow) && !is_int($flow)) {
                 throw new InvalidArgumentException('Invalid flow given - must be numeric');
             }
             if ($flow < 0) {
                 throw new InvalidArgumentException('Flow must not be negative');
             }
-            if ($this->capacity !== NULL && $flow > $this->capacity) {
+            if ($this->capacity !== null && $flow > $this->capacity) {
                 throw new RangeException('New flow exceeds maximum capacity');
             }
         }
@@ -227,8 +255,9 @@ abstract class Base implements VerticesAggregate, AttributeAware
     /**
      * get graph instance this edge is attached to
      *
-     * @return Graph
      * @throws LogicException
+     *
+     * @return Graph
      */
     public function getGraph()
     {
@@ -249,6 +278,7 @@ abstract class Base implements VerticesAggregate, AttributeAware
      *
      * @uses Graph::removeEdge()
      * @uses Vertex::removeEdge()
+     *
      * @return void
      */
     public function destroy()
@@ -262,7 +292,8 @@ abstract class Base implements VerticesAggregate, AttributeAware
     /**
      * create new clone of this edge between adjacent vertices
      *
-     * @return Edge new edge
+     * @return Edges new edge
+     *
      * @uses Graph::createEdgeClone()
      */
     public function createEdgeClone()
@@ -273,7 +304,8 @@ abstract class Base implements VerticesAggregate, AttributeAware
     /**
      * create new clone of this edge inverted (in opposite direction) between adjacent vertices
      *
-     * @return Edge new edge
+     * @return Edges new edge
+     *
      * @uses Graph::createEdgeCloneInverted()
      */
     public function createEdgeCloneInverted()
@@ -284,7 +316,7 @@ abstract class Base implements VerticesAggregate, AttributeAware
     /**
      * do NOT allow cloning of objects
      *
-     * @throws Exception
+     * @throws \Exception
      */
     private function __clone()
     {
@@ -298,11 +330,18 @@ abstract class Base implements VerticesAggregate, AttributeAware
         return isset($this->attributes[$name]) ? $this->attributes[$name] : $default;
     }
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     */
     public function setAttribute($name, $value)
     {
         $this->attributes[$name] = $value;
     }
 
+    /**
+     * @return AttributeBagReference
+     */
     public function getAttributeBag()
     {
         return new AttributeBagReference($this->attributes);

@@ -3,16 +3,11 @@
 namespace Fhaculty\Graph;
 
 use Fhaculty\Graph\Exception\BadMethodCallException;
-use Fhaculty\Graph\Exception\UnexpectedValueException;
 use Fhaculty\Graph\Exception\InvalidArgumentException;
 use Fhaculty\Graph\Exception\OverflowException;
 use Fhaculty\Graph\Exception\UnderflowException;
 use Fhaculty\Graph\Exception\RuntimeException;
 use Fhaculty\Graph\Exception\OutOfBoundsException;
-use Fhaculty\Graph\Algorithm\ConnectedComponents as AlgorithmConnectedComponents;
-use Fhaculty\Graph\Algorithm\Bipartit as AlgorithmBipartit;
-use Fhaculty\Graph\Algorithm\Eulerian as AlgorithmEulerian;
-use Fhaculty\Graph\Algorithm\Groups as AlgorithmGroups;
 use Fhaculty\Graph\Edge\Base as Edge;
 use Fhaculty\Graph\Edge\Directed as EdgeDirected;
 use Fhaculty\Graph\Set\Vertices;
@@ -24,13 +19,13 @@ use Fhaculty\Graph\Attribute\AttributeBagReference;
 
 class Graph implements DualAggregate, AttributeAware
 {
-    protected $verticesStorage = array();
+    protected $verticesStorage = [];
     protected $vertices;
 
-    protected $edgesStorage = array();
+    protected $edgesStorage = [];
     protected $edges;
 
-    protected $attributes = array();
+    protected $attributes = [];
 
     public function __construct()
     {
@@ -62,16 +57,19 @@ class Graph implements DualAggregate, AttributeAware
      * create a new Vertex in the Graph
      *
      * @param  int|NULL                 $id              new vertex ID to use (defaults to NULL: use next free numeric ID)
-     * @param  boolean                  $returnDuplicate normal operation is to throw an exception if given id already exists. pass true to return original vertex instead
-     * @return Vertex                   (chainable)
+     * @param  bool                  $returnDuplicate normal operation is to throw an exception if given id already exists. pass true to return original vertex instead
+     *
      * @throws InvalidArgumentException if given vertex $id is invalid
      * @throws OverflowException        if given vertex $id already exists and $returnDuplicate is not set
+     *
+     * @return Vertex                   (chainable)
+     *
      * @uses Vertex::getId()
      */
-    public function createVertex($id = NULL, $returnDuplicate = false)
+    public function createVertex($id = null, $returnDuplicate = false)
     {
         // no ID given
-        if ($id === NULL) {
+        if ($id === null) {
             $id = $this->getNextId();
         }
         if ($returnDuplicate && $this->vertices->hasVertexId($id)) {
@@ -85,8 +83,10 @@ class Graph implements DualAggregate, AttributeAware
      * create a new Vertex in this Graph from the given input Vertex of another graph
      *
      * @param  Vertex           $originalVertex
-     * @return Vertex           new vertex in this graph
+     *
      * @throws RuntimeException if vertex with this ID already exists
+     *
+     * @return Vertex           new vertex in this graph
      */
     public function createVertexClone(Vertex $originalVertex)
     {
@@ -112,7 +112,7 @@ class Graph implements DualAggregate, AttributeAware
      */
     public function createGraphCloneEdgeless()
     {
-        $graph = new Graph();
+        $graph = new self();
         $graph->getAttributeBag()->setAttributes($this->getAttributeBag()->getAttributes());
         // TODO: set additional graph attributes
         foreach ($this->getVertices() as $originalVertex) {
@@ -127,7 +127,9 @@ class Graph implements DualAggregate, AttributeAware
      * create new clone/copy of this graph - copy all attributes and vertices. but only copy all given edges
      *
      * @param  Edges|Edge[] $edges set or array of edges to be cloned
+     *
      * @return Graph
+     *
      * @uses Graph::createGraphCloneEdgeless()
      * @uses Graph::createEdgeClone() for each edge to be cloned
      */
@@ -145,6 +147,7 @@ class Graph implements DualAggregate, AttributeAware
      * create new clone/copy of this graph - copy all attributes, vertices and edges
      *
      * @return Graph
+     *
      * @uses Graph::createGraphCloneEdges() to clone graph with current edges
      */
     public function createGraphClone()
@@ -156,7 +159,9 @@ class Graph implements DualAggregate, AttributeAware
      * create a new clone/copy of this graph - copy all attributes and given vertices and its edges
      *
      * @param  Vertices $vertices set of vertices to keep
+     *
      * @return Graph
+     *
      * @uses Graph::createGraphClone() to create a complete clone
      * @uses Vertex::destroy() to remove unneeded vertices again
      */
@@ -178,7 +183,9 @@ class Graph implements DualAggregate, AttributeAware
      * create new clone of the given edge between adjacent vertices
      *
      * @param  Edge $originalEdge original edge (not neccessarily from this graph)
+     *
      * @return Edge new edge in this graph
+     *
      * @uses Graph::createEdgeCloneInternal()
      */
     public function createEdgeClone(Edge $originalEdge)
@@ -190,7 +197,9 @@ class Graph implements DualAggregate, AttributeAware
      * create new clone of the given edge inverted (in opposite direction) between adjacent vertices
      *
      * @param  Edge $originalEdge original edge (not neccessarily from this graph)
+     *
      * @return Edge new edge in this graph
+     *
      * @uses Graph::createEdgeCloneInternal()
      */
     public function createEdgeCloneInverted(Edge $originalEdge)
@@ -204,7 +213,9 @@ class Graph implements DualAggregate, AttributeAware
      * @param  Edge $originalEdge original edge from old graph
      * @param  int  $ia           index of start vertex
      * @param  int  $ib           index of end vertex
+     *
      * @return Edge new edge in this graph
+     *
      * @uses Edge::getVertices()
      * @uses Graph::getVertex()
      * @uses Vertex::createEdge() to create a new undirected edge if given edge was undrected
@@ -244,12 +255,14 @@ class Graph implements DualAggregate, AttributeAware
      * create the given number of vertices or given array of Vertex IDs
      *
      * @param  int|array $n number of vertices to create or array of Vertex IDs to create
+     *
      * @return Vertices set of Vertices created
+     *
      * @uses Graph::getNextId()
      */
     public function createVertices($n)
     {
-        $vertices = array();
+        $vertices = [];
         if (is_int($n) && $n >= 0) {
             for ($id = $this->getNextId(), $n += $id; $id < $n; ++$id) {
                 $vertices[$id] = new Vertex($this, $id);
@@ -301,8 +314,10 @@ class Graph implements DualAggregate, AttributeAware
      * returns the Vertex with identifier $id
      *
      * @param  int|string           $id identifier of Vertex
-     * @return Vertex
+     *
      * @throws OutOfBoundsException if given vertex ID does not exist
+     *
+     * @return Vertex
      */
     public function getVertex($id)
     {
@@ -313,7 +328,8 @@ class Graph implements DualAggregate, AttributeAware
      * checks whether given vertex ID exists in this graph
      *
      * @param int|string $id identifier of Vertex
-     * @return boolean
+     *
+     * @return bool
      */
     public function hasVertex($id)
     {
@@ -324,8 +340,10 @@ class Graph implements DualAggregate, AttributeAware
      * adds a new Vertex to the Graph (MUST NOT be called manually!)
      *
      * @param  Vertex $vertex instance of the new Vertex
+     *
      * @return void
      * @private
+     *
      * @see self::createVertex() instead!
      */
     public function addVertex(Vertex $vertex)
@@ -340,8 +358,10 @@ class Graph implements DualAggregate, AttributeAware
      * adds a new Edge to the Graph (MUST NOT be called manually!)
      *
      * @param  Edge $edge instance of the new Edge
+     *
      * @return void
      * @private
+     *
      * @see Vertex::createEdge() instead!
      */
     public function addEdge(Edge $edge)
@@ -353,17 +373,19 @@ class Graph implements DualAggregate, AttributeAware
      * remove the given edge from list of connected edges (MUST NOT be called manually!)
      *
      * @param  Edge                     $edge
-     * @return void
+     *
      * @throws InvalidArgumentException if given edge does not exist (should not ever happen)
+     *
+     * @return void
      * @private
+     *
      * @see Edge::destroy() instead!
      */
     public function removeEdge(Edge $edge)
     {
         try {
             unset($this->edgesStorage[$this->edges->getIndexEdge($edge)]);
-        }
-        catch (OutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
             throw new InvalidArgumentException('Invalid Edge does not exist in this Graph');
         }
     }
@@ -372,17 +394,19 @@ class Graph implements DualAggregate, AttributeAware
      * remove the given vertex from list of known vertices (MUST NOT be called manually!)
      *
      * @param  Vertex                   $vertex
-     * @return void
+     *
      * @throws InvalidArgumentException if given vertex does not exist (should not ever happen)
+     *
+     * @return void
      * @private
+     *
      * @see Vertex::destroy() instead!
      */
     public function removeVertex(Vertex $vertex)
     {
         try {
             unset($this->verticesStorage[$this->vertices->getIndexVertex($vertex)]);
-        }
-        catch (OutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
             throw new InvalidArgumentException('Invalid Vertex does not exist in this Graph');
         }
     }
@@ -391,9 +415,11 @@ class Graph implements DualAggregate, AttributeAware
      * Extracts edge from this graph
      *
      * @param  Edge               $edge
-     * @return Edge
+     *
      * @throws UnderflowException if no edge was found
      * @throws OverflowException  if multiple edges match
+     *
+     * @return Edge
      */
     public function getEdgeClone(Edge $edge)
     {
@@ -407,9 +433,11 @@ class Graph implements DualAggregate, AttributeAware
      * Extracts inverted edge from this graph
      *
      * @param  Edge               $edge
-     * @return Edge
+     *
      * @throws UnderflowException if no edge was found
      * @throws OverflowException  if multiple edges match
+     *
+     * @return Edge
      */
     public function getEdgeCloneInverted(Edge $edge)
     {
@@ -443,6 +471,7 @@ class Graph implements DualAggregate, AttributeAware
      * do NOT allow cloning of objects (MUST NOT be called!)
      *
      * @throws BadMethodCallException
+     *
      * @see Graph::createGraphClone() instead
      */
     private function __clone()
